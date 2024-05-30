@@ -1,0 +1,208 @@
+
+---
+title: "R Workshop 4 - Create Tables and Figures for Scientific Publication"
+author: "Dr.Xiaolan Liao - OUHSC"
+date: "`r Sys.Date()`"
+output: word_document
+---
+  
+
+
+<!--  Set the working directory to the repository's base director-->
+```{r, echo=F, message=F}
+library(knitr)
+library(magrittr)
+library(gtsummary)
+
+
+
+
+```
+
+<!-- Set the report-wide options, and point to the external code file. -->
+```{r set-options, echo=F}
+
+echo_chunks    <- FALSE #Toggle for debugging.
+message_chunks <- FALSE #Toggle for debugging.
+options(width=100) #So the output is 25% wider than the default.
+read_chunk("C:/Users/Xiaolan Liao/Desktop/Projects/SOMI2023/SOMI2024/R Workshop IV_05302024.R") 
+
+```
+ 
+
+<!-- Load packages, or at least verify they're available on the local machine.  Suppress the output when loading packages. -->
+```{r load-packages , echo=echo_chunks, results = 'hide', message=message_chunks}
+```
+ 
+ 
+```{r} 
+
+## -- User-defined-functions
+
+# Function to remove leading zeros
+remove_leadingzero <- function(x) {
+  sub("^0+", "", as.numeric(x)) 
+}
+
+# modify the default function
+estimate_fun_modified <-  function(x) {
+  x <- gtsummary::style_sigfig(x, digits = 2)
+  x <- remove_leadingzero(x)
+}
+
+pvalue_stars <- function(p) {
+  p <- as.numeric(p)  # Ensure p is numeric
+  
+  styled_p <- gtsummary::style_pvalue(p, digits = 3)
+  formatted_p <- sub("^0+", "", as.character(styled_p))
+  
+  dplyr::case_when(
+    p < 0.001 ~ paste0(formatted_p, "***"),
+    p < 0.01  ~ paste0(formatted_p, "**"),
+    p < 0.05  ~ paste0(formatted_p,"*"),
+    TRUE      ~ formatted_p
+  )
+  
+}
+
+```
+ 
+ 
+ 
+
+<!-- Load the datasets.   -->
+```{r load-data, echo=echo_chunks, results='hide', message=message_chunks}
+```
+
+ 
+<!-- tweak the datasets.   -->
+```{r tweak-data, echo=echo_chunks, results='hide', message=message_chunks}
+```
+ 
+Results
+=============================================
+## Table 1.  
+```{r  descriptive-univariate-table1,  echo=FALSE,  results = 'show',  message = FALSE, warning=FALSE}
+```
+\newpage
+
+## Table 2.  
+```{r  descriptive-univariate-table2,  echo=FALSE,  results = 'show',  message = FALSE, warning=FALSE}
+```
+\newpage
+
+
+## Table 3.  
+```{r  descriptive-univariate-bygroup-table,  echo=FALSE,  results = 'show',  message = FALSE, warning=FALSE}
+```
+\newpage
+
+## Graph 1
+```{r  descriptive-bivariate1,  echo=FALSE,  results = 'show',  message = FALSE, warning=FALSE}
+```
+
+## Graph 2
+```{r  descriptive-bivariate2,  echo=FALSE,  results = 'show',  message = FALSE, warning=FALSE}
+```
+ 
+## Graph 3
+```{r  descriptive-bivariate3,  echo=FALSE,  results = 'show',  message = FALSE, warning=FALSE}
+```
+ 
+## Graph 4
+```{r  descriptive-bivariate4,  echo=FALSE,  results = 'show',  message = FALSE, warning=FALSE}
+```
+ 
+## Graph 5
+```{r  descriptive-bivariate5,  echo=FALSE,  results = 'show',  message = FALSE, warning=FALSE}
+```
+ 
+\newpage
+## Table 2.1. Multiple-linear-regression
+```{r Multivariate-Multiple-linear-regression,  echo=FALSE,  results = 'show',  message = FALSE, warning=FALSE}
+```
+
+\newpage
+
+## Table 2.2. Logistic-regression
+
+```{r MMultivariate-Logistic-regression,  echo=FALSE,  results = 'show',  message = FALSE, warning=FALSE}
+```
+
+
+```{r}
+## -- User-defined-functions
+
+# Function to remove leading zeros
+remove_leadingzero <- function(x) {
+  sub("^0+", "", as.numeric(x)) 
+}
+
+# modify the default function
+estimate_fun_modified <-  function(x) {
+  x <- gtsummary::style_sigfig(x, digits = 2)
+  x <- remove_leadingzero(x)
+}
+
+pvalue_stars <- function(p) {
+  p <- as.numeric(p)  # Ensure p is numeric
+  
+  styled_p <- gtsummary::style_pvalue(p, digits = 3)
+  formatted_p <- sub("^0+", "", as.character(styled_p))
+  
+  dplyr::case_when(
+    p < 0.001 ~ paste0(formatted_p, "***"),
+    p < 0.01  ~ paste0(formatted_p, "**"),
+    p < 0.05  ~ paste0(formatted_p,"*"),
+    TRUE      ~ formatted_p
+  )
+}
+
+ stats::glm( mom_smoking ~ 
+               child_age     +
+               mom_age       +
+               income        +
+               child_gender  +
+               mom_education            +
+               child_sleep_quality      +
+               mom_drinking  +
+               screen_time   +
+               child_autism_diagnosis, 
+             data = df,
+             family = 'binomial') |>
+   #gtsummary::tbl_regression() |>
+   gtsummary::tbl_regression(
+     exponentiate  = TRUE,
+     pvalue_fun = pvalue_stars ,
+     estimate_fun = estimate_fun_modified,
+     
+      label = 
+       list(
+         child_age ~ 'Child age',
+         mom_age   ~ 'Mom age',
+         income                ~ "Income",
+         child_gender          ~ "Child gender",
+         mom_education         ~ "Mom education",
+         child_sleep_quality   ~ "Child sleep quality",
+         mom_drinking  ~ "Mom drinking",
+         screen_time   ~ "Screen time",
+         child_autism_diagnosis ~ "Child autism diagnosis"
+       )
+     
+     ) |>
+   gtsummary::as_flex_table()  |>
+   flextable::padding(padding.top = .1, padding.bottom = .1) |> # adjust width between rows
+   flextable::width(j = 1, width = 2)       |> # adjust width between columns
+   flextable::width(j = 3, width = 1.5)     |> 
+   #flextable::font(font ='Courier')  |>  # Georgia; Courier
+   flextable::font(font ="Times New Roman") |> # chaneg font
+   flextable::fontsize(size = 11)           |> # change fontsize
+   flextable::add_header_lines ('Logistic Regression: predicting mom smoking') |>
+   flextable::align(align = 'center', part = 'body')    |>
+   flextable::align(j= 1, align = 'left', part = 'body')|>
+   #flextable::align(align = 'center', part = 'header')  |>
+   flextable::align(i= 1,  align = 'left', part = 'header') |>
+   flextable::fontsize(i = 1,size = 11, part = 'header') 
+
+```
+ 

@@ -13,6 +13,7 @@ output: word_document
 library(knitr)
 library(magrittr)
 library(gtsummary)
+library(ggplot2)
 
 
 
@@ -34,42 +35,6 @@ read_chunk("C:/Users/Xiaolan Liao/Desktop/Projects/SOMI2023/SOMI2024/R Workshop 
 ```{r load-packages , echo=echo_chunks, results = 'hide', message=message_chunks}
 ```
  
- 
-```{r} 
-
-## -- User-defined-functions
-
-# Function to remove leading zeros
-remove_leadingzero <- function(x) {
-  sub("^0+", "", as.numeric(x)) 
-}
-
-# modify the default function
-estimate_fun_modified <-  function(x) {
-  x <- gtsummary::style_sigfig(x, digits = 2)
-  x <- remove_leadingzero(x)
-}
-
-pvalue_stars <- function(p) {
-  p <- as.numeric(p)  # Ensure p is numeric
-  
-  styled_p <- gtsummary::style_pvalue(p, digits = 3)
-  formatted_p <- sub("^0+", "", as.character(styled_p))
-  
-  dplyr::case_when(
-    p < 0.001 ~ paste0(formatted_p, "***"),
-    p < 0.01  ~ paste0(formatted_p, "**"),
-    p < 0.05  ~ paste0(formatted_p,"*"),
-    TRUE      ~ formatted_p
-  )
-  
-}
-
-```
- 
- 
- 
-
 <!-- Load the datasets.   -->
 ```{r load-data, echo=echo_chunks, results='hide', message=message_chunks}
 ```
@@ -78,7 +43,17 @@ pvalue_stars <- function(p) {
 <!-- tweak the datasets.   -->
 ```{r tweak-data, echo=echo_chunks, results='hide', message=message_chunks}
 ```
- 
+
+Summary
+=============================================
+* *Univariate analysis* (focuses on a single variable)
+* *Bivariate analysis* (focuses on 2 variables)
+* *Multivariate analysis* (2+ variables)
+
+
+
+\newpage
+
 Results
 =============================================
 ## Table 1.  
@@ -163,10 +138,7 @@ pvalue_stars <- function(p) {
                mom_age       +
                income        +
                child_gender  +
-               mom_education            +
                child_sleep_quality      +
-               mom_drinking  +
-               screen_time   +
                child_autism_diagnosis, 
              data = df,
              family = 'binomial') |>
@@ -180,12 +152,9 @@ pvalue_stars <- function(p) {
        list(
          child_age ~ 'Child age',
          mom_age   ~ 'Mom age',
-         income                ~ "Income",
-         child_gender          ~ "Child gender",
-         mom_education         ~ "Mom education",
-         child_sleep_quality   ~ "Child sleep quality",
-         mom_drinking  ~ "Mom drinking",
-         screen_time   ~ "Screen time",
+         income                 ~ "Income",
+         child_gender           ~ "Child gender",
+         child_sleep_quality    ~ "Child sleep quality",
          child_autism_diagnosis ~ "Child autism diagnosis"
        )
      
